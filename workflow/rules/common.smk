@@ -18,7 +18,8 @@ samples = (
 
 TUMOR_SAMPLES = set(
     samples.loc[
-        samples["alias"].str.startswith(config["alias_prefixes"]["tumor"]), "sample_name"
+        samples["alias"].str.startswith(config["alias_prefixes"]["tumor"]),
+        "sample_name",
     ]
 )
 
@@ -36,15 +37,16 @@ NORMAL_ALIASES = set(
 
 ### wildcard constraints
 
+
 wildcard_constraints:
     sample="|".join(samples["sample_name"].drop_duplicates()),
     group="|".join(samples["group"].drop_duplicates()),
     tumor_alias="|".join(TUMOR_ALIASES),
     normal_alias="|".join(NORMAL_ALIASES),
-    alias="|".join( [*TUMOR_ALIASES, *NORMAL_ALIASES] ),
+    alias="|".join([*TUMOR_ALIASES, *NORMAL_ALIASES]),
+
 
 ### helper functions
-
 
 
 def get_tumor_purity_setting(wildcards):
@@ -52,7 +54,7 @@ def get_tumor_purity_setting(wildcards):
         purity = samples.loc[
             (samples["sample_name"] == wildcards.sample)
             & (samples["group"] == wildcards.group),
-            'tumor_purity'
+            "tumor_purity",
         ].squeeze()
         if not math.isnan(purity):
             return f"--purity {purity}"
@@ -72,10 +74,10 @@ def is_tumor_sample_in_group(tumor_sample, group):
         (samples["sample_name"] == tumor_sample)
         & (samples["group"] == group)
         & (samples["alias"].str.startswith(config["alias_prefixes"]["tumor"])),
-        :
+        :,
     ]
     return len(tumor_group) == 1
-   
+
 
 def get_group_sample_type(group, sample_type):
     sample_type_prefix = config["alias_prefixes"][sample_type]
@@ -94,11 +96,15 @@ def get_normal_alias_of_group(group):
     ].squeeze()
     if len(normal_alias) == 0:
         normal_alias = samples.loc[
-            samples["alias"].str.startswith(config["alias_prefixes"]["panel_of_normals"]),
+            samples["alias"].str.startswith(
+                config["alias_prefixes"]["panel_of_normals"]
+            ),
             "alias",
         ].squeeze()
     if type(normal_alias) != str and len(normal_alias) > 1:
-        raise ValueError(f"Ambiguous normal sample for group '{group}'. Found more than one normal alias:\n {normal_alias}")
+        raise ValueError(
+            f"Ambiguous normal sample for group '{group}'. Found more than one normal alias:\n {normal_alias}"
+        )
     if len(normal_alias) == 0:
         raise ValueError(
             f"No normal alias available for group '{group}', but this is needed for purity estimation\n"
@@ -112,7 +118,7 @@ def get_sample_sex(wildcards):
     sex = samples.loc[
         (samples["sample_name"] == wildcards.sample)
         & (samples["group"] == wildcards.group),
-        "sex"
+        "sex",
     ].squeeze()
     return sex
 
@@ -122,18 +128,26 @@ def get_tumor_sample_group_aliases_combinations():
     for tumor_sample in TUMOR_SAMPLES:
         groups = samples.loc[samples["sample_name"] == tumor_sample, "group"]
         if len(groups) == 0:
-            raise ValueError(f"Tumor sample '{tumor_sample}' has no group assigned in the sample sheet.")
+            raise ValueError(
+                f"Tumor sample '{tumor_sample}' has no group assigned in the sample sheet."
+            )
         else:
             for g in groups:
                 if is_tumor_sample_in_group(tumor_sample, g):
                     tumor_alias = samples.loc[
-                        (samples["group"] == g) &
-                        (samples["sample_name"] == tumor_sample) &
-                        (samples["alias"].str.startswith(config["alias_prefixes"]["tumor"])),
-                        "alias"
+                        (samples["group"] == g)
+                        & (samples["sample_name"] == tumor_sample)
+                        & (
+                            samples["alias"].str.startswith(
+                                config["alias_prefixes"]["tumor"]
+                            )
+                        ),
+                        "alias",
                     ].squeeze()
                     normal_alias = get_normal_alias_of_group(g)
-                    combinations.append(f"{tumor_sample}.{g}.{tumor_alias}.{normal_alias}")
+                    combinations.append(
+                        f"{tumor_sample}.{g}.{tumor_alias}.{normal_alias}"
+                    )
     return combinations
 
 
@@ -145,8 +159,10 @@ def get_cnvkit_batch_input(wildcards, sample_type="tumor", ext="bam"):
     if (len(sample_name) == 0) and (sample_type == "normal"):
         # fall back to a `panel_of_normals` alias, if no matched normal sample is present
         sample_name = samples.loc[
-            samples["alias"].str.startswith(config["alias_prefixes"]["panel_of_normals"]),
-            "sample_name"
+            samples["alias"].str.startswith(
+                config["alias_prefixes"]["panel_of_normals"]
+            ),
+            "sample_name",
         ].squeeze()
         if len(sample_name) == 0:
             # if not even a `panel_of_normal` sample is available, stick the tumor sample
@@ -163,9 +179,13 @@ def get_cnvkit_batch_input(wildcards, sample_type="tumor", ext="bam"):
 def get_cnvkit_call_input(wildcards):
     # no purity specified for this sample
     if len(get_tumor_purity_setting(wildcards)) == 0:
-        return f"results/cnvkit_batch/{wildcards.sample}.{wildcards.group}.{wildcards.tumor_alias}.{wildcards.normal_alias}.purity_adjusted.cns",
+        return (
+            f"results/cnvkit_batch/{wildcards.sample}.{wildcards.group}.{wildcards.tumor_alias}.{wildcards.normal_alias}.purity_adjusted.cns",
+        )
     else:
-        return f"results/cnvkit_batch/{wildcards.sample}.{wildcards.group}.{wildcards.tumor_alias}.{wildcards.normal_alias}.cns",
+        return (
+            f"results/cnvkit_batch/{wildcards.sample}.{wildcards.group}.{wildcards.tumor_alias}.{wildcards.normal_alias}.cns",
+        )
 
 
 def get_reference(wildcards):
@@ -175,8 +195,8 @@ def get_reference(wildcards):
 def get_targets(wildcards):
     return samples.loc[
         (samples["sample_name"] == wildcards.sample)
-            & (samples["group"] == wildcards.group),
-        "target_bed"
+        & (samples["group"] == wildcards.group),
+        "target_bed",
     ]
 
 

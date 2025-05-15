@@ -56,7 +56,7 @@ rule build_matrix_tumor_suppressor:
     input:
         expand(
             "results/cnvkit_call/filtered/tumor_supressor/{sample_group_aliases}_tumor_supressor_only.cns",
-            sample_group_aliases=get_tumor_sample_group_aliases_combinations()
+            sample_group_aliases=get_tumor_sample_group_aliases_combinations(),
         ),
     output:
         matrix_tsg="results/oncoprint/matrix/tumor_supressor_matrix.tsv",
@@ -87,7 +87,7 @@ rule build_matrix_oncogene:
     input:
         expand(
             "results/cnvkit_call/filtered/oncogene/{sample_group_aliases}_oncogene_only.cns",
-            sample_group_aliases=get_tumor_sample_group_aliases_combinations()
+            sample_group_aliases=get_tumor_sample_group_aliases_combinations(),
         ),
     output:
         matrix_tsg="results/oncoprint/matrix/oncogene_matrix.tsv",
@@ -116,8 +116,9 @@ rule oncoprint_oncogene:
 
 rule build_matrix_vgp:
     input:
-        expand("results/cnvkit_call/filtered/vgp/{sample_group_aliases}_vgp.cns",
-            sample_group_aliases=get_tumor_sample_group_aliases_combinations()
+        expand(
+            "results/cnvkit_call/filtered/vgp/{sample_group_aliases}_vgp.cns",
+            sample_group_aliases=get_tumor_sample_group_aliases_combinations(),
         ),
     output:
         matrix_vgp="results/oncoprint/matrix/vgp_matrix.tsv",

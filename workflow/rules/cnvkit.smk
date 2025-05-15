@@ -1,6 +1,6 @@
 rule cnvkit_access:
     input:
-        fasta=get_reference, 
+        fasta=get_reference,
     output:
         "results/access-mappable.bed",
     conda:
@@ -235,10 +235,12 @@ rule cnvkit_call:
         "  -o {output.cns} "
         ") 2>{log}"
 
+
 rule cnvkit_export_seg:
     input:
-        cns=expand("results/cnvkit_call/{sample_group_aliases}.cns",
-            sample_group_aliases=get_tumor_sample_group_aliases_combinations()
+        cns=expand(
+            "results/cnvkit_call/{sample_group_aliases}.cns",
+            sample_group_aliases=get_tumor_sample_group_aliases_combinations(),
         ),
     output:
         "results/cnvkit/segments.seg",
