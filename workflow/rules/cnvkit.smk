@@ -20,7 +20,7 @@ rule cnvkit_batch:
         bai_T=lambda w: get_cnvkit_batch_input(w, ext="bai"),
         bai_N=lambda w: get_cnvkit_batch_input(w, sample_type="normal", ext="bai"),
         fasta=get_reference,
-        targets=get_targets,
+        targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
     output:
         cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
@@ -32,6 +32,7 @@ rule cnvkit_batch:
         normal=lambda wc, input: input.normal if (input.normal != input.tumor) else " ",
         batch=config["cnvkit"]["batch"],
         chr_sex=get_chr_sex,
+        targets=lambda wc, input: f"--targets {input.targets}" if input.targets else "",
     conda:
         "../envs/cnvkit.yaml"
     log:
@@ -40,7 +41,7 @@ rule cnvkit_batch:
     shell:
         "(cnvkit.py batch {input.tumor} "
         "  --normal {params.normal} "
-        "  --targets {input.targets} "
+        "  {params.targets} "
         "  --fasta {input.fasta} "
         "  --output-reference {output.cnn} "
         "  --access {input.access} "

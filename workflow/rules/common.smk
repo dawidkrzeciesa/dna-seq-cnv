@@ -8,7 +8,10 @@ import math
 
 samples = (
     pd.read_csv(
-        config["samples"], sep="\t", dtype={"sample_name": str, "target_bed": str}
+        config["samples"],
+        sep="\t",
+        dtype={"sample_name": str, "target_bed": str},
+        keep_default_na=False,  # keep empty entries empty strings, do not encode as NaN
     )
     .set_index(["sample_name"], drop=False)
     .sort_index()
@@ -176,6 +179,15 @@ def get_cnvkit_batch_input(wildcards, sample_type="tumor", ext="bam"):
     return f"results/recal/{sample_name}.{ext}"
 
 
+def get_cnvkit_batch_targets(wildcards):
+    file = samples.loc[
+        (samples["sample_name"] == wildcards.sample)
+        & (samples["group"] == wildcards.group),
+        "target_bed",
+    ].squeeze()
+    return file if file else []
+
+
 def get_cnvkit_call_input(wildcards):
     # no purity specified for this sample
     if len(get_tumor_purity_setting(wildcards)) == 0:
@@ -190,14 +202,6 @@ def get_cnvkit_call_input(wildcards):
 
 def get_reference(wildcards):
     return config["ref"]
-
-
-def get_targets(wildcards):
-    return samples.loc[
-        (samples["sample_name"] == wildcards.sample)
-        & (samples["group"] == wildcards.group),
-        "target_bed",
-    ]
 
 
 def get_varlociraptor_present_bcf(wildcards):
