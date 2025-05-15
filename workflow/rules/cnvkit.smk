@@ -23,9 +23,9 @@ rule cnvkit_batch:
         targets=get_targets,
         access=rules.cnvkit_access.output,
     output:
-        cns="results/cnvkit_batch/{sample}.{group}.cns",
-        cnr="results/cnvkit_batch/{sample}.{group}.cnr",
-        cnn="results/cnvkit_batch/{sample}.{group}.cnn",
+        cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
+        cnr="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnr",
+        cnn="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnn",
     params:
         folder=lambda wc, output: path.dirname(output.cns),
         basename=lambda wc, input: path.splitext(path.basename(input.tumor))[0],
@@ -35,7 +35,7 @@ rule cnvkit_batch:
     conda:
         "../envs/cnvkit.yaml"
     log:
-        "logs/cnvkit_batch/{sample}.{group}.log",
+        "logs/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.log",
     threads: 64
     shell:
         "(cnvkit.py batch {input.tumor} "
@@ -140,7 +140,7 @@ use rule annotate_tumor_allele_depth as annotate_normal_allele_depth with:
 
 rule cnvkit_to_theta2:
     input:
-        cns="results/cnvkit_batch/{sample}.{group}.cns",
+        cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
         vcf="results/theta2/{sample}.{group}.genotypes.{tumor_alias}_ad.{normal_alias}_ad.vcf",
     output:
         interval_count="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.interval_count",
