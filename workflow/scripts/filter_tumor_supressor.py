@@ -1,5 +1,8 @@
 import pandas as pd
 
+import sys
+
+sys.stderr = open(snakemake.log[0], "w", buffering=1)
 
 ####### OncoKB #######
 

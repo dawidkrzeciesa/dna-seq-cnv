@@ -1,10 +1,12 @@
 rule get_onco_kb:
     output:
         "resources/onco_kb/cancerGeneList.txt",
+    log:
+        "logs/onco_kb/get_cancerGeneList.log",
     params:
         onco_kb_download_link=config["onco_kb"],
     shell:
-        "wget -O {output} {params.onco_kb_download_link}"
+        "wget -O {output} {params.onco_kb_download_link} 2> {log}"
 
 
 rule filter_oncogene:
@@ -60,6 +62,8 @@ rule build_matrix_tumor_suppressor:
         ),
     output:
         matrix_tsg="results/oncoprint/matrix/tumor_supressor_matrix.tsv",
+    log:
+        "logs/oncoprint/matrix/tumor_supressor_matrix.log",
     conda:
         "../envs/pandas.yaml"
     script:
@@ -75,6 +79,8 @@ rule oncoprint_tumor_suppressors:
             category="oncoprints",
             caption="../report/oncoprint_fusions.rst",
         ),
+    log:
+        "logs/oncoprint/tumor_supressor_deletions_only.log",
     conda:
         "../envs/oncoprint.yaml"
     params:
@@ -91,6 +97,8 @@ rule build_matrix_oncogene:
         ),
     output:
         matrix_tsg="results/oncoprint/matrix/oncogene_matrix.tsv",
+    log:
+        "logs/oncoprint/matrix/oncogene_matrix.log",
     conda:
         "../envs/pandas.yaml"
     script:
@@ -106,6 +114,8 @@ rule oncoprint_oncogene:
             category="oncoprints",
             caption="../report/oncoprint_fusions.rst",
         ),
+    log:
+        "logs/oncoprint/oncogene_amplifications_only.log",
     conda:
         "../envs/oncoprint.yaml"
     params:
@@ -122,6 +132,8 @@ rule build_matrix_vgp:
         ),
     output:
         matrix_vgp="results/oncoprint/matrix/vgp_matrix.tsv",
+    log:
+        "logs/oncoprint/matrix/vgp_matrix.log",
     conda:
         "../envs/pandas.yaml"
     script:
@@ -137,6 +149,8 @@ rule oncoprint_vgp:
             category="oncoprints",
             caption="../report/oncoprint_fusions.rst",
         ),
+    log:
+        "logs/oncoprint/oncogene_vgp.log",
     conda:
         "../envs/oncoprint.yaml"
     params:

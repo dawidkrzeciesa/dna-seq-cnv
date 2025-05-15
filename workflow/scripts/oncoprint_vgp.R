@@ -1,3 +1,8 @@
+log <- file(snakemake@log[[1]], open="wt")
+sink(log)
+sink(log, type="message")
+rlang::global_entrace()
+
 library(ComplexHeatmap)
 
 column_title = snakemake@params[[1]]

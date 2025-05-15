@@ -1,5 +1,9 @@
 import pandas as pd
 
+import sys
+
+sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
 df = pd.read_csv(snakemake.input[0], sep="\t")
 
 chromosome = [

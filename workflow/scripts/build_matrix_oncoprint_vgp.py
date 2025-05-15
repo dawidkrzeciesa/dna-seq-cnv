@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import glob, os
 
+import sys
+
+sys.stderr = open(snakemake.log[0], "w", buffering=1)
+
 input_files = str(snakemake.input)
 
 input_files = input_files.split()
