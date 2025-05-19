@@ -23,6 +23,13 @@ alias_prefixes:
 # config["ref"] = "path/to/ref.fasta"
 ref: "resources/my_genome.fasta"
 
+# This workflow takes bam files from the dna-seq-varlociraptor workflow
+# as input, and assumes that they are in the relative path `results/recal/`.
+# If dna-seq-varlociraptor was run in a different folder, you can specify 
+# the (relative) path to it here, for example `../dna-seq-varlociraptor/`.
+# Do not include `results/recal/` here, as this is used implicitly.
+bam_prefix: ""
+
 cnvkit:
   batch: ""
   access_param: "-s 10000"

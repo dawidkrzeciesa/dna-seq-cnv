@@ -176,7 +176,8 @@ def get_cnvkit_batch_input(wildcards, sample_type="tumor", ext="bam"):
         raise AssertionError(
             f"Group {wildcards.group} does not have a sample with whose alias has the tumor prefix '{config['alias_prefixes']['tumor']}'"
         )
-    return f"results/recal/{sample_name}.{ext}"
+    bam_prefix = config.get("bam_prefix", "")
+    return f"{bam_prefix}results/recal/{sample_name}.{ext}"
 
 
 def get_cnvkit_batch_targets(wildcards):
