@@ -32,7 +32,7 @@ rule cnvkit_batch:
         normal=lambda wc, input: input.normal if (input.normal != input.tumor) else " ",
         batch=config["cnvkit"]["batch"],
         chr_sex=get_chr_sex,
-        targets=lambda wc, input: f"--targets {input.targets}" if input.targets else "",
+        targets=lambda wc, input: f"--targets {input.targets}" if input.targets else "--method wgs",
     conda:
         "../envs/cnvkit.yaml"
     log:
