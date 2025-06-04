@@ -3,3 +3,4 @@ channels:
   - bioconda
 dependencies:
   - bioconductor-complexheatmap ==2.6.2
+  - r-rlang ==1.0
