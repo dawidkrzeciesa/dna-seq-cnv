@@ -13,6 +13,48 @@ rule cnvkit_access:
         "(cnvkit.py access {input} {params.access_param} -o {output}) 2>{log}"
 
 
+rule download_info_for_cnvkit_ref_flat_file:
+    output:
+        table="resources/ref_flat.long.tsv.gz",  # .gz extension is optional, but recommended
+    params:
+        biomart="genes",
+        species=lookup(within=config, dpath="ref/species"),
+        build=lookup(within=config, dpath="ref/build"),
+        release=lookup(within=config, dpath="ref/release"),
+        attributes=[
+            "external_gene_name",
+            "ensembl_transcript_id",
+            "chromosome_name",
+            "strand",
+            "transcript_start",
+            "transcript_end",
+            "cds_start",
+            "cds_end",
+            "exon_chrom_start",
+            "exon_chrom_end",
+        ],
+        # filters={ "chromosome_name": ["22", "X"] }, # optional: restrict output by using filters
+    log:
+        "logs/download_info_for_cnvkit_ref_flat_file.log",
+    cache: "omit-software"  # save space and time with between workflow caching (see docs)
+    wrapper:
+        "v7.0.0/bio/reference/ensembl-biomart-table"
+
+
+rule generate_cnvkit_ref_flat_file:
+    input:
+        table="resources/ref_flat.long.tsv.gz",
+    output:
+        table="resources/ref.flat.tsv.gz",
+    log:
+        "logs/generate_cnvkit_ref_flat_file.log",
+    conda:
+        "../envs/tidyverse.yaml"
+    cache: "omit-software"  # save space and time with between workflow caching (see docs)
+    script:
+        "../scripts/generate_cnvkit_ref_flat_file.R"
+
+
 rule cnvkit_batch:
     input:
         tumor=get_cnvkit_batch_input,
@@ -22,6 +64,7 @@ rule cnvkit_batch:
         fasta=get_reference,
         targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
+        ref_flat="resources/ref.flat.tsv.gz",
     output:
         cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
         cnr="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnr",
@@ -47,6 +90,7 @@ rule cnvkit_batch:
         "  --fasta {input.fasta} "
         "  --output-reference {output.cnn} "
         "  --access {input.access} "
+        "  --annotate {input.ref_flat} "
         "  --output-dir {params.folder} "
         "  --diagram "
         "  --scatter "
