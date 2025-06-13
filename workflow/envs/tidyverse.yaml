@@ -2,5 +2,5 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - tidyverse =2.0
+  - r-tidyverse =2.0
   - r-base =4
