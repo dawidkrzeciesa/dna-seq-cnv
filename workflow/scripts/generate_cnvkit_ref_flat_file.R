@@ -22,6 +22,11 @@ ref_flat = read_tsv(snakemake@input[["table"]]) |>
     exon_ends = str_flatten(exon_chrom_end, collapse = ",")
   ) |>
   mutate(
+    strand = case_match(
+      strand,
+      1 ~ "+",
+      -1 ~ "-"
+    ),
     # to mirror the refFlat.txt format, we add trailing commas to
     # lists of exon start and end positions
     across(c(exon_starts, exon_ends), ~ str_c(.x, ",")),
