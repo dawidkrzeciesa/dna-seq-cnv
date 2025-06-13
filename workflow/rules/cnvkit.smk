@@ -51,6 +51,7 @@ rule generate_cnvkit_ref_flat_file:
     conda:
         "../envs/tidyverse.yaml"
     cache: "omit-software"  # save space and time with between workflow caching (see docs)
+    threads: 8
     script:
         "../scripts/generate_cnvkit_ref_flat_file.R"
 

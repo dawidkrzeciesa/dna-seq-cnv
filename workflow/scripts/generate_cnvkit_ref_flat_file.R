@@ -3,9 +3,12 @@ sink(log)
 sink(log, type = "message")
 rlang::global_entrace()
 
+library(multidplyr)
 library(tidyverse)
 
-ref_flat = read_tsv(snakemake@input[["table"]]) |>
+multi_core_cluster <- new_cluster(snakemake@threads)
+
+partitioned_input = read_tsv(snakemake@input[["table"]]) |>
   group_by(
     external_gene_name,
     ensembl_transcript_id,
@@ -14,26 +17,31 @@ ref_flat = read_tsv(snakemake@input[["table"]]) |>
     transcript_start,
     transcript_end
   ) |>
+  partition(
+    multi_core_cluster
+  )
+
+ref_flat <- partitioned_input |>
   summarize(
     cds_start = min(cds_start, na.rm = TRUE),
     cds_end = max(cds_end, na.rm = TRUE),
-    num_exons = n(),
-    exon_starts = str_flatten(exon_chrom_start, collapse = ","),
-    exon_ends = str_flatten(exon_chrom_end, collapse = ",")
+    num_exons = dplyr::n(),
+    exon_starts = stringr::str_flatten(exon_chrom_start, collapse = ","),
+    exon_ends = stringr::str_flatten(exon_chrom_end, collapse = ",")
   ) |>
   mutate(
-    strand = case_match(
+    strand = dplyr::case_match(
       strand,
       1 ~ "+",
       -1 ~ "-"
     ),
     # to mirror the refFlat.txt format, we add trailing commas to
     # lists of exon start and end positions
-    across(c(exon_starts, exon_ends), ~ str_c(.x, ",")),
+    across(c(exon_starts, exon_ends), ~ stringr::str_c(.x, ",")),
     # if no cds exists for a (non-coding) transcript, we want an NA
     # value that will be written as an empty value below
-    cds_start = na_if(cds_start, Inf),
-    cds_end = na_if(cds_end, -Inf)
+    cds_start = dplyr::na_if(cds_start, Inf),
+    cds_end = dplyr::na_if(cds_end, -Inf)
   ) |>
   select(
     external_gene_name,
@@ -47,7 +55,8 @@ ref_flat = read_tsv(snakemake@input[["table"]]) |>
     num_exons,
     exon_starts,
     exon_ends
-  )
+  ) |>
+  collect()
 
 write_tsv(
   ref_flat,

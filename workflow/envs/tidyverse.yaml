@@ -3,4 +3,5 @@ channels:
   - nodefaults
 dependencies:
   - r-tidyverse =2.0
+  - r-multidplyr
   - r-base =4
