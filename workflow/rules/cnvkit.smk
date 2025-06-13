@@ -45,7 +45,7 @@ rule generate_cnvkit_ref_flat_file:
     input:
         table="resources/ref_flat.long.tsv.gz",
     output:
-        table="resources/ref.flat.tsv.gz",
+        table="resources/ref_flat.tsv.gz",
     log:
         "logs/generate_cnvkit_ref_flat_file.log",
     conda:
@@ -64,7 +64,7 @@ rule cnvkit_batch:
         fasta=lookup(within=config, dpath="ref/existing_fasta"),
         targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
-        ref_flat="resources/ref.flat.tsv.gz",
+        ref_flat="resources/ref_flat.tsv.gz",
     output:
         cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
         cnr="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnr",
