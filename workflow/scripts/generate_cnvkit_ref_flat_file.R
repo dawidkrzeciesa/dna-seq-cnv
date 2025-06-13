@@ -36,7 +36,7 @@ ref_flat = read_tsv(snakemake@input[["table"]]) |>
     chromosome_name,
     strand,
     transcript_start,
-    transcript_end
+    transcript_end,
     cds_start,
     cds_end,
     num_exons,
