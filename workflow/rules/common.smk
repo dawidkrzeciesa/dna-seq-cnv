@@ -201,10 +201,6 @@ def get_cnvkit_call_input(wildcards):
         )
 
 
-def get_reference(wildcards):
-    return config["ref"]
-
-
 def get_varlociraptor_present_bcf(wildcards):
     event = config["cnvkit"]["joint_event"]
     return f"results/calls/{wildcards.group}.SNV.{event}.fdr-controlled.bcf"

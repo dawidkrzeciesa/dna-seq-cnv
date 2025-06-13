@@ -1,6 +1,6 @@
 rule cnvkit_access:
     input:
-        fasta=get_reference,
+        fasta=lookup(within=config, dpath="ref/existing_fasta"),
     output:
         "results/access-mappable.bed",
     conda:
@@ -61,7 +61,7 @@ rule cnvkit_batch:
         normal=lambda w: get_cnvkit_batch_input(w, sample_type="normal"),
         bai_T=lambda w: get_cnvkit_batch_input(w, ext="bai"),
         bai_N=lambda w: get_cnvkit_batch_input(w, sample_type="normal", ext="bai"),
-        fasta=get_reference,
+        fasta=lookup(within=config, dpath="ref/existing_fasta"),
         targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
         ref_flat="resources/ref.flat.tsv.gz",

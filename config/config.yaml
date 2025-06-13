@@ -15,13 +15,23 @@ alias_prefixes:
   normal: "normal"
   panel_of_normals: "panel_of_normals"
 
-# One option here is an actual path to a reference fasta file (like
-# "resources/my_genome.fasta"). But you can also ensure that this key gets set
-# in an encompassing workflow that loads this workflow as a module, for example
-# by assigning the path of the reference creating by another imported module
-# that was used for creating the BAM files (mapping). Just assign it to:
-# config["ref"] = "path/to/ref.fasta"
-ref: "resources/my_genome.fasta"
+ref:
+  # One option here is an actual path to a reference fasta file (like
+  # "resources/my_genome.fasta"). But you can also ensure that this key gets set
+  # in an encompassing workflow that loads this workflow as a module, for example
+  # by assigning the path of the reference creating by another imported module
+  # that was used for creating the BAM files (mapping). Just assign it to:
+  # config["ref"]["existing_fasta"] = "path/to/ref.fasta"
+  existing_fasta: "resources/my_genome.fasta"
+  # Number of chromosomes to consider for calling.
+  # The first n entries of the FASTA will be considered.
+  n_chromosomes: 25
+  # Ensembl species name
+  species: homo_sapiens
+  # Ensembl release
+  release: 113
+  # Genome build
+  build: GRCh38
 
 # This workflow takes bam files from the dna-seq-varlociraptor workflow
 # as input, and assumes that they are in the relative path `results/recal/`.
