@@ -83,7 +83,7 @@ rule cnvkit_batch:
         "../envs/cnvkit.yaml"
     log:
         "logs/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.log",
-    threads: 64
+    threads: 2
     shell:
         "(cnvkit.py batch {input.tumor} "
         "  --normal {params.normal} "
