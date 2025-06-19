@@ -13,47 +13,20 @@ rule cnvkit_access:
         "(cnvkit.py access {input} {params.access_param} -o {output}) 2>{log}"
 
 
-rule download_info_for_cnvkit_ref_flat_file:
+rule download_annotation_gff3:
     output:
-        table="resources/ref_flat.long.tsv.gz",  # .gz extension is optional, but recommended
+        "resources/annotation.gff3",
     params:
-        biomart="genes",
         species=lookup(within=config, dpath="ref/species"),
         build=lookup(within=config, dpath="ref/build"),
         release=lookup(within=config, dpath="ref/release"),
-        attributes=[
-            "external_gene_name",
-            "ensembl_transcript_id",
-            "chromosome_name",
-            "strand",
-            "transcript_start",
-            "transcript_end",
-            "cds_start",
-            "cds_end",
-            "exon_chrom_start",
-            "exon_chrom_end",
-        ],
-        # filters={ "chromosome_name": ["22", "X"] }, # optional: restrict output by using filters
+        flavor="",  # optional, e.g. chr_patch_hapl_scaff, see Ensembl FTP.
+        # branch="plants",  # optional: specify branch
     log:
-        "logs/download_info_for_cnvkit_ref_flat_file.log",
+        "logs/download_annotation_gff3.log",
     cache: "omit-software"  # save space and time with between workflow caching (see docs)
     wrapper:
-        "v7.0.0/bio/reference/ensembl-biomart-table"
-
-
-rule generate_cnvkit_ref_flat_file:
-    input:
-        table="resources/ref_flat.long.tsv.gz",
-    output:
-        table="resources/ref_flat.tsv",
-    log:
-        "logs/generate_cnvkit_ref_flat_file.log",
-    conda:
-        "../envs/tidyverse.yaml"
-    cache: "omit-software"  # save space and time with between workflow caching (see docs)
-    threads: 8
-    script:
-        "../scripts/generate_cnvkit_ref_flat_file.R"
+        "v7.0.0/bio/reference/ensembl-annotation"
 
 
 rule cnvkit_batch:
@@ -65,7 +38,7 @@ rule cnvkit_batch:
         fasta=lookup(within=config, dpath="ref/existing_fasta"),
         targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
-        ref_flat="resources/ref_flat.tsv",
+        gff3="resources/annotation.gff3",
     output:
         cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
         cnr="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnr",
@@ -91,7 +64,7 @@ rule cnvkit_batch:
         "  --fasta {input.fasta} "
         "  --output-reference {output.cnn} "
         "  --access {input.access} "
-        "  --annotate {input.ref_flat} "
+        "  --annotate {input.gff3} "
         "  --output-dir {params.folder} "
         "  --diagram "
         "  --scatter "
