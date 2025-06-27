@@ -28,6 +28,26 @@ rule download_annotation_gff3:
     wrapper:
         "v7.0.0/bio/reference/ensembl-annotation"
 
+# do the conversion as suggested here:
+# https://github.com/etal/cnvkit/issues/311#issuecomment-367500456
+rule convert_gff3_to_bed:
+    input:
+        gff3="resources/annotation.gff3",
+    output:
+        bed="resources/annotation.bed",
+    log:
+        "logs/annotation.gff3_to_bed.log",
+    conda:
+        "../envs/cnvkit.yaml"
+    shell:
+        "( skg_convert.py {input.gff3} "
+        "    --from gff "
+        "    --to bed4 "
+        "    --gff-type gene "
+        "    --flatten "
+        "    --output {output.bed} "
+        ") >{log} 2>&1"
+
 
 rule cnvkit_batch:
     input:
@@ -38,7 +58,7 @@ rule cnvkit_batch:
         fasta=lookup(within=config, dpath="ref/existing_fasta"),
         targets=get_cnvkit_batch_targets,
         access=rules.cnvkit_access.output,
-        gff3="resources/annotation.gff3",
+        bed="resources/annotation.bed",
     output:
         cns="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cns",
         cnr="results/cnvkit_batch/{sample}.{group}.{tumor_alias}.{normal_alias}.cnr",
@@ -64,7 +84,7 @@ rule cnvkit_batch:
         "  --fasta {input.fasta} "
         "  --output-reference {output.cnn} "
         "  --access {input.access} "
-        "  --annotate {input.gff3} "
+        "  --annotate {input.bed} "
         "  --output-dir {params.folder} "
         "  --diagram "
         "  --scatter "
