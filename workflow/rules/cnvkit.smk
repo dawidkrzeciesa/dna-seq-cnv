@@ -13,9 +13,9 @@ rule cnvkit_access:
         "(cnvkit.py access {input} {params.access_param} -o {output}) 2>{log}"
 
 
-rule download_annotation_gff3:
+rule download_annotation_gtf:
     output:
-        "resources/annotation.gff3",
+        "resources/annotation.gtf",
     params:
         species=lookup(within=config, dpath="ref/species"),
         build=lookup(within=config, dpath="ref/build"),
@@ -28,11 +28,26 @@ rule download_annotation_gff3:
     wrapper:
         "v7.0.0/bio/reference/ensembl-annotation"
 
+
+rule ensure_gene_name_for_all_entries:
+    input:
+        "resources/annotation.gtf",
+    output:
+        "resources/annotation.gene_name_for_all_entries.gtf",
+    log:
+        "logs/annotation.gene_name_for_all_entries.gtf",
+    params:
+        extra='--itsv --implicit-tsv-header --pass-comments --otsv --headerless-tsv-output put \'if (!strmatch($9,"gene_name")) {$9 = sub($9, "gene_id (\\"ENSG[^\\"]+\\");", "gene_id \\1; gene_name \\1;")}\'',
+    threads: 4
+    wrapper:
+        "v7.1.0/utils/miller"
+
+
 # do the conversion as suggested here:
 # https://github.com/etal/cnvkit/issues/311#issuecomment-367500456
-rule convert_gff3_to_bed:
+rule convert_gtf_to_bed:
     input:
-        gff3="resources/annotation.gff3",
+        gtf="resources/annotation.gene_name_for_all_entries.gtf",
     output:
         bed="resources/annotation.bed",
     log:
@@ -40,9 +55,10 @@ rule convert_gff3_to_bed:
     conda:
         "../envs/cnvkit.yaml"
     shell:
-        "( skg_convert.py {input.gff3} "
+        "( skg_convert.py {input.gtf} "
         "    --from gff "
         "    --to bed4 "
+        "    --gff-tag gene_name "
         "    --gff-type gene "
         "    --flatten "
         "    --output {output.bed} "
