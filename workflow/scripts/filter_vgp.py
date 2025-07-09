@@ -24,7 +24,7 @@ oncokb_lst = OncoKB["gene"].tolist()
 cns = pd.read_csv(snakemake.input["cns"], sep="\t")
 
 cns["gene"] = cns.gene.str.split(",")
-cns = cns.explode("gene")
+cns = cns.explode("gene").drop_duplicates()
 
 cns_vgp = cns[cns["gene"].isin(oncokb_lst)]
 
